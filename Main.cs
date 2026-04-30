@@ -37,10 +37,10 @@ namespace PacketLogger
                     AutoFlush = true
                 };
 
-                Chat.WriteLine($"[TradeCrasher] Plugin dir: {pluginDir}");
-                Chat.WriteLine($"[TradeCrasher] Log dir: {logDir}");
-                Chat.WriteLine($"[TradeCrasher] Log file path: {_logFilePath}");
-                Chat.WriteLine($"[TradeCrasher] Log file exists right now: {File.Exists(_logFilePath)}");
+                Chat.WriteLine($"[PacketLogger] Plugin dir: {pluginDir}");
+                Chat.WriteLine($"[PacketLogger] Log dir: {logDir}");
+                Chat.WriteLine($"[PacketLogger] Log file path: {_logFilePath}");
+                Chat.WriteLine($"[PacketLogger] Log file exists right now: {File.Exists(_logFilePath)}");
 
                 Log("Logger ready.");
                 Log($"Log file: {_logFilePath}");
@@ -52,28 +52,43 @@ namespace PacketLogger
             }
             catch (Exception ex)
             {
-                Chat.WriteLine($"[TradeCrasher] Failed to start logger: {ex}");
+                Chat.WriteLine($"[PacketLogger] Failed to start logger: {ex}");
             }
         }
 
         private void OnPacketSent(object sender, object packet)
         {
-            DumpObject("PACKET SENT", packet);
+            //DumpObject("PACKET SENT", packet);
         }
 
         private void OnPacketReceived(object sender, object packet)
         {
-            DumpObject("PACKET RECEIVED", packet);
+            //DumpObject("PACKET RECEIVED", packet);
         }
 
         private void OnN3MessageSent(object sender, N3Message message)
         {
+            if (ShouldIgnoreN3Message(message))
+                return;
+
             DumpObject("N3 SENT", message);
         }
 
         private void OnN3MessageReceived(object sender, N3Message message)
         {
+            if (ShouldIgnoreN3Message(message))
+                return;
+
             DumpObject("N3 RECEIVED", message);
+        }
+
+        private bool ShouldIgnoreN3Message(N3Message message)
+        {
+            if (message == null)
+                return false;
+
+            return message is StatMessage
+                || message is FollowTargetMessage;
         }
 
         private void DumpObject(string direction, object obj)
